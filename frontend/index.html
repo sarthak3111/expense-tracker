@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ExpenseTracker | Premium Financial Management</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Icons (Phosphor Icons) -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Global Loader (New Feature) -->
+    <div id="global-loader" class="loader-overlay hidden">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container"></div>
+
+    <!-- 1. Authentication Section -->
+    <section id="auth-section" class="active">
+        <div class="auth-container">
+            <div class="auth-box glass">
+                <div class="auth-header">
+                    <i class="ph-fill ph-wallet"></i>
+                    <h2>ExpenseTracker</h2>
+                </div>
+                
+                <!-- Login Form -->
+                <form id="login-form">
+                    <h3>Welcome Back</h3>
+                    <p class="subtitle">Securely log in to manage your finances.</p>
+                    <p id="login-error-msg" class="form-error hidden"></p>
+                    <div class="input-group">
+                        <label for="login-username">Username</label>
+                        <input type="text" id="login-username" name="username" required autocomplete="username" placeholder="Enter your username">
+                    </div>
+                    <div class="input-group">
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" name="password" required autocomplete="current-password" placeholder="••••••••">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Login</button>
+                    <p class="switch-auth">Don't have an account? <span onclick="app.switchAuthMode('signup')">Sign Up</span></p>
+                </form>
+
+                <!-- Signup Form -->
+                <form id="signup-form" class="hidden">
+                    <h3>Create Account</h3>
+                    <p class="subtitle">Join us to start tracking your expenses.</p>
+                    <p id="signup-error-msg" class="form-error hidden"></p>
+                    <div class="input-group">
+                        <label for="signup-username">Username</label>
+                        <input type="text" id="signup-username" name="username" required autocomplete="username" placeholder="Choose a username">
+                    </div>
+                    <div class="input-group">
+                        <label for="signup-password">Password</label>
+                        <input type="password" id="signup-password" name="password" required autocomplete="new-password" placeholder="Create a password">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Sign Up</button>
+                    <p class="switch-auth">Already have an account? <span onclick="app.switchAuthMode('login')">Login</span></p>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- 2. Main Dashboard Application Section -->
+    <section id="app-section" class="hidden">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar glass">
+            <div class="sidebar-header">
+                <i class="ph-fill ph-wallet"></i>
+                <h2>ExTrack</h2>
+            </div>
+            
+            <ul class="nav-links">
+                <li class="active" data-view="dashboard" onclick="app.switchView('dashboard')">
+                    <i class="ph ph-squares-four"></i> <span>Dashboard</span>
+                </li>
+                <li data-view="expenses" onclick="app.switchView('expenses')">
+                    <i class="ph ph-receipt"></i> <span>Expenses</span>
+                </li>
+                <li data-view="analytics" onclick="app.switchView('analytics')">
+                    <i class="ph ph-chart-pie-slice"></i> <span>Analytics</span>
+                </li>
+            </ul>
+            
+            <div class="sidebar-footer">
+                <div class="user-profile-section">
+                    <div class="avatar-container">
+                        <!-- Default Avatar / Profile Imag -->
+                        <img src="https://api.dicebear.com/7.x/initials/svg?seed=User" id="user-avatar-img" class="avatar-img" alt="Profile Picture">
+                        <!-- Upload Button Overlay -->
+                        <label for="profile-pic-upload" class="upload-btn-overlay" title="Upload Profile Picture">
+                            <i class="ph ph-camera"></i>
+                        </label>
+                        <!-- Hidden input to fire the fetch request automatically -->
+                        <input type="file" id="profile-pic-upload" name="profile_pic" accept="image/png, image/jpeg, image/jpg" class="hidden">
+                    </div>
+                    <p id="display-username" class="user-name text-main mt-2 text-center" style="font-weight: 600;">User</p>
+                </div>
+                <button class="btn btn-outline text-danger logout-btn" onclick="app.logout()" title="Logout">
+                    <i class="ph ph-sign-out"></i> <span class="logout-text">Logout</span>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- App Header: Month Selector & Income -->
+            <header class="top-header glass">
+                <div class="month-selector">
+                    <button onclick="app.prevMonth()" class="btn-icon"><i class="ph ph-caret-left"></i></button>
+                    <h3 id="current-month-display">January 2024</h3>
+                    <button onclick="app.nextMonth()" class="btn-icon"><i class="ph ph-caret-right"></i></button>
+                </div>
+                <div class="income-setup">
+                    <span class="text-muted">Monthly Income: </span>
+                    <!-- Format replaced with ₹ everywhere -->
+                    <span id="display-income" class="income-val">₹0.00</span>
+                    <button class="btn btn-sm btn-outline" onclick="app.editIncome()"><i class="ph ph-pencil-simple"></i> Edit</button>
+                </div>
+            </header>
+
+            <!-- 2.1 Dashboard View -->
+            <div id="view-dashboard" class="view active">
+                <!-- Summary Stats -->
+                <div class="stats-grid">
+                    <div class="stat-card glass hover-lift">
+                        <div class="stat-icon income-icon"><i class="ph ph-arrow-down-left"></i></div>
+                        <div class="stat-details">
+                            <p class="text-muted">Total Income</p>
+                            <h2 id="dash-income">₹0.00</h2>
+                        </div>
+                    </div>
+                    <div class="stat-card glass hover-lift">
+                        <div class="stat-icon expense-icon"><i class="ph ph-arrow-up-right"></i></div>
+                        <div class="stat-details">
+                            <p class="text-muted">Total Expenses</p>
+                            <h2 id="dash-expenses">₹0.00</h2>
+                        </div>
+                    </div>
+                    <div class="stat-card glass hover-lift">
+                        <div class="stat-icon balance-icon"><i class="ph ph-scales"></i></div>
+                        <div class="stat-details">
+                            <p class="text-muted">Remaining Balance</p>
+                            <h2 id="dash-balance">₹0.00</h2>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-bottom">
+                    <!-- Recent Expenses List -->
+                    <div class="recent-expenses glass">
+                        <div class="section-header">
+                            <h3>Recent Expenses</h3>
+                            <button class="btn btn-sm text-primary view-all-btn" onclick="app.switchView('expenses')">View All &rarr;</button>
+                        </div>
+                        <div class="expense-list" id="dash-expense-list">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+                    <!-- Quick Chart -->
+                    <div class="quick-chart glass">
+                        <h3>Expense Distribution</h3>
+                        <div class="chart-container">
+                            <canvas id="dash-doughnut-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2.2 Expenses Registration View -->
+            <div id="view-expenses" class="view hidden">
+                <div class="expenses-layout">
+                    <!-- Form for Adding / Editing Expense -->
+                    <div class="add-expense-panel glass relative">
+                        <h3 id="form-title">Add Expense</h3>
+                        <form id="expense-form">
+                            <input type="hidden" id="expense-id" name="id">
+                            <div class="input-group">
+                                <label for="expense-title">Title</label>
+                                <input type="text" id="expense-title" name="title" required placeholder="e.g. Groceries">
+                            </div>
+                            <div class="input-group">
+                                <label for="expense-amount">Amount (₹)</label>
+                                <input type="number" id="expense-amount" name="amount" required min="0.01" step="0.01" placeholder="0.00">
+                            </div>
+                            <div class="input-group">
+                                <label for="expense-date">Date</label>
+                                <input type="date" id="expense-date" name="date" required>
+                            </div>
+                            <div class="input-group">
+                                <label for="expense-category">Category</label>
+                                <select id="expense-category" name="category" required>
+                                    <option value="Food">Food & Dining</option>
+                                    <option value="Travel">Transportation</option>
+                                    <option value="Housing">Housing & Utilities</option>
+                                    <option value="Entertainment">Entertainment</option>
+                                    <option value="Shopping">Shopping</option>
+                                    <option value="Health">Health & Wellness</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-actions mt-4">
+                                <button type="button" class="btn btn-secondary" id="cancel-edit-btn" style="display: none;" onclick="app.cancelEdit()">Cancel</button>
+                                <button type="submit" class="btn btn-primary" id="save-expense-btn">Add Expense</button>
+                            </div>
+                        </form>
+                    </div>
+                    <!-- Full expenses list table -->
+                    <div class="expense-list-panel glass">
+                        <h3>Monthly Logs</h3>
+                        <div class="table-container mt-2">
+                            <table id="expenses-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Title</th>
+                                        <th>Category</th>
+                                        <th>Amount</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="expenses-table-body">
+                                    <!-- Populated via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2.3 Analytics View -->
+            <div id="view-analytics" class="view hidden">
+                <div class="analytics-grid">
+                    <div class="chart-card glass">
+                        <h3>Monthly Category Distribution</h3>
+                        <p class="text-muted mb-2">Breakdown of exactly where your money went this month.</p>
+                        <div class="chart-container large">
+                            <canvas id="category-chart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card glass multi-month">
+                        <h3>Income vs Expenses Trend</h3>
+                        <p class="text-muted mb-2">Historical data over the last 6 months.</p>
+                        <div class="chart-container large">
+                            <canvas id="trend-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </section>
+
+    <!-- 3. Modal for Income Edit -->
+    <div id="income-modal" class="modal hidden">
+        <div class="modal-backdrop" onclick="app.closeIncomeModal()"></div>
+        <div class="modal-content glass">
+            <h2>Set Monthly Income</h2>
+            <p class="text-muted mb-4">Total expected income for <strong id="modal-month-name" class="text-main"></strong></p>
+            <form id="income-form">
+                <div class="input-group">
+                    <input type="number" id="income-input" name="income" min="0" step="0.01" required placeholder="Enter amount in ₹">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="app.closeIncomeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Income</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Application Script -->
+    <script src="script.js"></script>
+</body>
+</html>

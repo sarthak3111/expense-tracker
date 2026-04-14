@@ -1,0 +1,30 @@
+CREATE DATABASE IF NOT EXISTS expense_tracker;
+USE expense_tracker;
+
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    profile_pic VARCHAR(255) DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS income (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    month VARCHAR(7) NOT NULL, -- Format: YYYY-MM
+    amount DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE KEY user_month_unique (user_id, month)
+);
+
+CREATE TABLE IF NOT EXISTS expenses (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    category VARCHAR(100) NOT NULL,
+    date DATE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
