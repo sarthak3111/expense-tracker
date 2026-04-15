@@ -47,6 +47,17 @@ if (move_uploaded_file($file['tmp_name'], $destination)) {
     $dbPath = 'uploads/' . $fileName;
 
     try {
+        // First, get the current profile picture path to delete it later
+        $stmt = $pdo->prepare("SELECT profile_pic FROM users WHERE id = :id");
+        $stmt->execute([':id' => $user_id]);
+        $oldProfilePic = $stmt->fetchColumn();
+
+        // If an old profile picture exists and is not the default, delete it
+        if ($oldProfilePic && $oldProfilePic !== 'uploads/default.png' && file_exists(__DIR__ . '/../' . $oldProfilePic)) {
+            unlink(__DIR__ . '/../' . $oldProfilePic);
+        }
+
+
         // Update the users table
         $stmt = $pdo->prepare("UPDATE users SET profile_pic = :profile_pic WHERE id = :id");
         $stmt->execute([

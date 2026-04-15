@@ -1,23 +1,18 @@
 <?php
-// backend/config.php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
-$host = 'localhost';
-$dbname = 'expense_tracker';
-$username = 'root';
-$password = ''; // Default XAMPP password is empty
+$host = '127.0.0.1';
+$db = 'expense_tracker';
+$user = 'root';
+$pass = '';
 
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $username, $password);
-    
-    // Set PDO error mode to exception
+    $pdo = new PDO("mysql:host=$host;port=3306;dbname=$db;charset=utf8", $user, $pass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    
-    // Return PDO connection (implicitly available to files that require this script)
-    
-} catch(PDOException $e) {
-    // If the backend fails to connect, output JSON error to handle gracefully on the frontend
-    header('Content-Type: application/json');
-    echo json_encode(['error' => 'Database connection failed: ' . $e->getMessage()]);
-    exit();
+} catch (PDOException $e) {
+    die("DB ERROR: " . $e->getMessage());
 }
+
+// echo "DB CONNECTED SUCCESSFULLY"
 ?>

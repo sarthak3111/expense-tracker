@@ -71,7 +71,7 @@
     </section>
 
     <!-- 2. Main Dashboard Application Section -->
-    <section id="app-section" class="hidden">
+    <section id="app-section" class="hidden" style="display: none;">
         <!-- Sidebar Navigation -->
         <nav class="sidebar glass">
             <div class="sidebar-header">
@@ -80,13 +80,13 @@
             </div>
             
             <ul class="nav-links">
-                <li class="active" data-view="dashboard" onclick="app.switchView('dashboard')">
+                <li class="active" data-view="dashboard" id="nav-dashboard">
                     <i class="ph ph-squares-four"></i> <span>Dashboard</span>
                 </li>
-                <li data-view="expenses" onclick="app.switchView('expenses')">
+                <li data-view="expenses" id="nav-expenses">
                     <i class="ph ph-receipt"></i> <span>Expenses</span>
                 </li>
-                <li data-view="analytics" onclick="app.switchView('analytics')">
+                <li data-view="analytics" id="nav-analytics">
                     <i class="ph ph-chart-pie-slice"></i> <span>Analytics</span>
                 </li>
             </ul>
@@ -159,8 +159,8 @@
                     <!-- Recent Expenses List -->
                     <div class="recent-expenses glass">
                         <div class="section-header">
-                            <h3>Recent Expenses</h3>
-                            <button class="btn btn-sm text-primary view-all-btn" onclick="app.switchView('expenses')">View All &rarr;</button>
+                            <h3>Recent Expenses</h3> 
+                            <button class="btn btn-sm text-primary view-all-btn" onclick="app.showView('expenses')">View All &rarr;</button>
                         </div>
                         <div class="expense-list" id="dash-expense-list">
                             <!-- Populated via JS -->
@@ -209,7 +209,7 @@
                                 </select>
                             </div>
                             <div class="form-actions mt-4">
-                                <button type="button" class="btn btn-secondary" id="cancel-edit-btn" style="display: none;" onclick="app.cancelEdit()">Cancel</button>
+                                <button type="button" class="btn btn-secondary" id="cancel-edit-btn" style="display: none;">Cancel</button>
                                 <button type="submit" class="btn btn-primary" id="save-expense-btn">Add Expense</button>
                             </div>
                         </form>
@@ -261,7 +261,7 @@
 
     <!-- 3. Modal for Income Edit -->
     <div id="income-modal" class="modal hidden">
-        <div class="modal-backdrop" onclick="app.closeIncomeModal()"></div>
+        <div class="modal-backdrop" id="modal-backdrop"></div>
         <div class="modal-content glass">
             <h2>Set Monthly Income</h2>
             <p class="text-muted mb-4">Total expected income for <strong id="modal-month-name" class="text-main"></strong></p>
@@ -269,15 +269,15 @@
                 <div class="input-group">
                     <input type="number" id="income-input" name="income" min="0" step="0.01" required placeholder="Enter amount in ₹">
                 </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" onclick="app.closeIncomeModal()">Cancel</button>
+                <div class="modal-actions" id="income-modal-actions">
+                    <button type="button" class="btn btn-secondary" id="cancel-income-modal">Cancel</button>
                     <button type="submit" class="btn btn-primary">Save Income</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Application Script -->
-    <script src="script.js"></script>
+    <!-- Application Script --> 
+    <script src="script.js" ></script>
 </body>
 </html>

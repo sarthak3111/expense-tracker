@@ -18,19 +18,49 @@ const app = {
         document.getElementById('expense-date').value = new Date().toISOString().split('T')[0];
     },
 
-    attachEventListeners() {
-        document.getElementById('login-form').addEventListener('submit', (e) => this.handleLogin(e));
-        document.getElementById('signup-form').addEventListener('submit', (e) => this.handleSignup(e));
-        document.getElementById('expense-form').addEventListener('submit', (e) => this.handleExpenseSubmit(e));
-        document.getElementById('income-form').addEventListener('submit', (e) => this.saveIncome(e));
-        
-        // Listen to profile picture upload input
-        const profileInput = document.getElementById('profile-pic-upload');
-        if (profileInput) {
-            profileInput.addEventListener('change', (e) => this.handleProfileUpload(e));
-        }
-    },
+   showView(view) {
+    document.querySelectorAll('.view').forEach(v => {
+        v.classList.add('hidden');
+        v.classList.remove('active');
+    });
 
+    const target = document.getElementById('view-' + view);
+    if (target) {
+        target.classList.remove('hidden');
+        target.classList.add('active');
+    }
+
+    document.querySelectorAll('.nav-links li').forEach(li => li.classList.remove('active'));
+    const activeNav = document.querySelector(`[data-view="${view}"]`);
+    if (activeNav) activeNav.classList.add('active');
+
+    // Trigger analytics charts when switching to that view
+    if (view === 'analytics') {
+        this.refreshData();
+    }
+},
+   attachEventListeners() {
+    document.querySelectorAll('[data-view]').forEach(item => {
+        item.addEventListener('click', () => {
+            this.showView(item.getAttribute('data-view'));
+        });
+    });
+
+    document.getElementById('login-form').addEventListener('submit', (e) => this.handleLogin(e));
+    document.getElementById('signup-form').addEventListener('submit', (e) => this.handleSignup(e));
+    document.getElementById('expense-form').addEventListener('submit', (e) => this.handleExpenseSubmit(e));
+    document.getElementById('income-form').addEventListener('submit', (e) => this.saveIncome(e));
+
+    // Missing handlers
+    document.getElementById('cancel-income-modal').addEventListener('click', () => this.closeIncomeModal());
+    document.getElementById('modal-backdrop').addEventListener('click', () => this.closeIncomeModal());
+    document.getElementById('cancel-edit-btn').addEventListener('click', () => this.cancelEdit());
+
+    const profileInput = document.getElementById('profile-pic-upload');
+    if (profileInput) {
+        profileInput.addEventListener('change', (e) => this.handleProfileUpload(e));
+    }
+},
     getMonthKey(date = this.currentDate) {
         return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
     },
@@ -182,6 +212,7 @@ const app = {
 
         this.currentUser = null;
         document.getElementById('app-section').classList.add('hidden');
+        document.getElementById('app-section').style.display = 'none'; 
         document.getElementById('auth-section').classList.remove('hidden');
         document.getElementById('login-form').reset();
         this.clearError('login-error-msg');
@@ -191,12 +222,13 @@ const app = {
     startApp() {
         document.getElementById('auth-section').classList.add('hidden');
         document.getElementById('app-section').classList.remove('hidden');
+        document.getElementById('app-section').style.display = 'flex';
         document.getElementById('display-username').textContent = this.currentUser.username;
         
         this.updateProfilePicDisplay(this.currentUser.profile_pic);
         this.updateMonthDisplay();
         this.refreshData();
-        this.switchView('dashboard');
+        this.showView('dashboard');
     },
 
     updateProfilePicDisplay(path) {
@@ -236,19 +268,19 @@ const app = {
         }
     },
 
-    switchView(viewName) {
-        document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
-        const targetView = document.getElementById(`view-${viewName}`);
-        if(targetView) targetView.classList.remove('hidden');
+    // switchView(viewName) {
+    //     document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+    //     const targetView = document.getElementById(`view-${viewName}`);
+    //     if(targetView) targetView.classList.remove('hidden');
         
-        document.querySelectorAll('.nav-links li').forEach(li => li.classList.remove('active'));
-        const activeLink = document.querySelector(`.nav-links li[data-view="${viewName}"]`);
-        if(activeLink) activeLink.classList.add('active');
+    //     document.querySelectorAll('.nav-links li').forEach(li => li.classList.remove('active'));
+    //     const activeLink = document.querySelector(`.nav-links li[data-view="${viewName}"]`);
+    //     if(activeLink) activeLink.classList.add('active');
         
-        if (viewName === 'analytics') {
-            this.refreshData();
-        }
-    },
+    //     if (viewName === 'analytics') {
+    //         this.refreshData();
+    //     }
+    // },
 
     // 7. Month Management
     nextMonth() {
@@ -428,7 +460,7 @@ const app = {
         document.getElementById('save-expense-btn').textContent = 'Update Expense';
         document.getElementById('cancel-edit-btn').style.display = 'inline-block';
         
-        this.switchView('expenses');
+        this.showView('expenses');
         document.querySelector('.add-expense-panel').scrollIntoView({ behavior: 'smooth' });
     },
 
@@ -565,7 +597,7 @@ const app = {
 
         // 12.2 Analytics View Detailed Category Pie Chart
         const ctxCatCanvas = document.getElementById('category-chart');
-        if (ctxCatCanvas && !ctxCatCanvas.closest('.hidden')) {
+        if (ctxCatCanvas) {
             if (this.charts.catChart) this.charts.catChart.destroy();
             const ctxCat = ctxCatCanvas.getContext('2d');
             

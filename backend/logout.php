@@ -1,10 +1,10 @@
 <?php
 // backend/logout.php
 
+// Start the session to have access to it
 // Ensure JSON response format
 header('Content-Type: application/json');
 
-// Start the session to have access to it
 session_start();
 
 // Unset all of the session variables

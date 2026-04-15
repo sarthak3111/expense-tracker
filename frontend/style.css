@@ -1,3 +1,4 @@
+
 :root {
     --bg-dark: #0f172a;
     --bg-darker: #020617;
@@ -47,7 +48,10 @@ button { cursor: pointer; font-family: inherit; border: none; background: none; 
 input, select { font-family: inherit; outline: none; }
 
 /* Utilities */
-.hidden { display: none !important; }
+
+.hidden { display: none; }
+.view { display: none; }
+.view:not(.hidden) { display: block; }
 .relative { position: relative; }
 .text-muted { color: var(--text-muted); }
 .text-primary { color: var(--primary); }
@@ -103,6 +107,7 @@ input, select { font-family: inherit; outline: none; }
     opacity: 0;
     pointer-events: none;
     visibility: hidden;
+    display:hidden;
 }
 
 .spinner {

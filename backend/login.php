@@ -1,6 +1,8 @@
 <?php
-// backend/login.php
 
+session_start();
+// backend/login.php
+// Start the session at the very beginning
 // Ensure JSON response format
 header('Content-Type: application/json');
 
@@ -31,9 +33,6 @@ try {
 
     // Verify user exists and password is correct
     if ($user && password_verify($password, $user['password'])) {
-        
-        // Start the session
-        session_start();
         
         // Store user details in session
         $_SESSION['user_id'] = $user['id'];
